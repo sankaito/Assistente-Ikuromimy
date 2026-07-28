@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import re
+import difflib
 import tempfile
 import time
 import uuid
@@ -670,7 +671,58 @@ def acao_fechar(app: str) -> None:
 # LOOP PRINCIPAL
 # ---------------------------------------------------------------------------
 
-def processar_comando(comando: str) -> bool:
+# ---------------------------------------------------------------------------
+# AUTOCOMPLETAR / AUTOCORREÇÃO DE COMANDOS
+# ---------------------------------------------------------------------------
+
+# Todas as palavras-gatilho que o processar_comando reconhece. Usado
+# tanto pra sugestão (autocompletar na interface) quanto pra tentar
+# corrigir erro de digitação na primeira palavra do comando.
+PALAVRAS_CHAVE_CONHECIDAS = [
+    "tocar", "pesquisar", "pesquisa", "buscar", "atualizar",
+    "abrir", "abre", "fechar", "fecha",
+    "play", "pause", "pausar",
+    "próxima", "proxima", "pula", "next",
+    "anterior", "voltar",
+    "aumentar", "sobe", "diminuir", "abaixa",
+    "loop", "repetir",
+    "para", "sair", "encerrar",
+]
+
+
+def listar_apps_conhecidos() -> list[str]:
+    """Devolve os nomes dos apps já indexados (atalhos do Menu Iniciar
+    + registro do Windows) — útil pra sugestão/autocompletar na
+    interface, ex: sugerir 'abrir spotify' enquanto o usuário digita."""
+    return sorted(_carregar_cache_apps().keys())
+
+
+def _tentar_corrigir_comando(comando: str) -> str | None:
+    """Se a primeira palavra do comando não bate com nenhuma palavra-
+    gatilho conhecida, tenta achar a mais parecida (erro de digitação,
+    tipo 'abrri' em vez de 'abrir') e devolve o comando corrigido.
+    Devolve None se não achar nada razoavelmente parecido."""
+    partes = comando.split(maxsplit=1)
+    if not partes:
+        return None
+
+    primeira = partes[0]
+    resto = partes[1] if len(partes) > 1 else ""
+
+    if primeira in PALAVRAS_CHAVE_CONHECIDAS:
+        return None  # já bate certinho, não é isso que está falhando
+
+    candidatos = difflib.get_close_matches(
+        primeira, PALAVRAS_CHAVE_CONHECIDAS, n=1, cutoff=0.72
+    )
+    if not candidatos:
+        return None
+
+    corrigida = candidatos[0]
+    return f"{corrigida} {resto}".strip()
+
+
+def processar_comando(comando: str, permitir_correcao: bool = True) -> bool:
     """Processa um comando. Retorna False se o programa deve encerrar."""
 
     comando = comando.lower().strip()
@@ -736,6 +788,12 @@ def processar_comando(comando: str) -> bool:
     if contem_palavra(comando, "para", "sair", "encerrar"):
         falar("Tchau!")
         return False
+
+    if permitir_correcao:
+        corrigido = _tentar_corrigir_comando(comando)
+        if corrigido and corrigido != comando:
+            falar(f'Não entendi "{comando}", tentando como "{corrigido}"...')
+            return processar_comando(corrigido, permitir_correcao=False)
 
     falar("Não entendi o comando.")
     return True

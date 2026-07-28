@@ -10,6 +10,23 @@ Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 ---
 
+## [1.10.0] — Atalhos e autocompletar
+
+### Adicionado
+- Botões de **atalhos pré-definidos** na aba Início: um clique executa
+  um comando pronto, sem digitar. Vem com 5 atalhos padrão (Spotify,
+  Chrome, Pesquisar, Play/Pause, Próxima) e dá pra adicionar/remover
+  os seus próprios (`ui/shortcuts_manager.py`), salvos entre sessões.
+- **Autocompletar** no campo de comando (`QCompleter`): sugere com
+  base no histórico de comandos já digitados, nas palavras-chave
+  conhecidas e nos apps instalados indexados pelo `escravo.py`.
+- **Autocorreção de comandos**: se a primeira palavra não bater com
+  nenhum gatilho conhecido (ex: "abrri" em vez de "abrir"), tenta
+  achar a mais parecida via `difflib` e executa o comando corrigido,
+  avisando o que interpretou.
+- `escravo.listar_apps_conhecidos()`: expõe a lista de apps indexados
+  pra outras partes do app (interface, controle remoto) sugerirem.
+
 ## [1.9.1] — Bugfix
 
 ### Corrigido
