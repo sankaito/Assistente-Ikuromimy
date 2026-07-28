@@ -1,0 +1,29 @@
+# Ambiente virtual Python
+venv/
+env/
+.venv/
+
+# Build do PyInstaller
+build/
+dist/
+*.spec.bak
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Configurações locais do PyCharm/VSCode
+.vscode/
+.idea/
+
+# Arquivos temporários gerados em runtime (fala em áudio, etc.)
+*.mp3
+temp_*.mp3
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+desktop.ini
