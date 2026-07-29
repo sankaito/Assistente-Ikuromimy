@@ -18,6 +18,7 @@ class Sidebar(QWidget):
         botoes = [
             ("🏠 Início", "inicio"),
             ("🎵 Música", "musica"),
+            ("🧩 Modos", "modos"),
             ("📱 Controle Remoto", "remoto"),
             ("💻 Sistema", "sistema"),
             ("⚙ Configurações", "config"),

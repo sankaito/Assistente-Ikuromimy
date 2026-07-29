@@ -10,6 +10,19 @@ Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 ---
 
+## [1.11.0] — Modos
+
+### Adicionado
+- Aba **Modos** nova: grupos de até 5 comandos que rodam em sequência
+  com um clique só (ex: "🧑‍💻 Modo Programador" abre VSCode + Spotify
+  + Claude de uma vez), executados numa thread separada
+  (`ui/modes_executor.py`) pra não travar a interface.
+- Botão **"+ Criar modo"** abre uma caixa (`ui/modes_dialog.py`) com
+  campo de nome e campos de comando, com "+ Adicionar comando" até o
+  limite de 5. Clique direito num modo existente remove ele.
+- Modos salvos entre sessões (`ui/modes_manager.py`, mesmo mecanismo
+  de persistência dos atalhos).
+
 ## [1.10.0] — Atalhos e autocompletar
 
 ### Adicionado
