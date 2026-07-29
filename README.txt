@@ -1,98 +1,117 @@
-# Ikuro Assistant
+# Assistente Virtual Ikuromimy
 
-Assistente de desktop com interface gráfica (PySide6), que executa comandos,
-toca música, mostra informações do sistema e permite personalizar o tema
-do app.
+Assistente virtual para Windows com comandos por voz/texto, interface
+gráfica em PySide6, e automações do dia a dia: tocar música no
+Spotify, abrir/fechar programas, pesquisar na web, controlar mídia e
+volume, entre outros.
 
-## Requisitos
+## Funcionalidades
 
-- Windows (o app usa `pywin32`/WMI pra ler informações de hardware, então
-  algumas funções da aba **Sistema** são específicas do Windows)
-- Python instalado, com o `pip` disponível
-
-Pra verificar se o Python está instalado, abra o terminal (PowerShell) e rode:
-
-```
-py --version
-```
-
-Se der erro dizendo que `py` não é reconhecido, instale o Python em
-https://www.python.org/downloads/ e marque a opção **"Add python.exe to PATH"**
-durante a instalação. Sendo a versão a rodar do python 3.14.6
+- 🎙 **Comandos por texto**: digite comandos livres como `abrir spotify`, `tocar bohemian rhapsody`, `pesquisar receita de bolo`, `fechar chrome`.
+- 🔘 **Atalhos pré-definidos**: botões na tela que executam um comando pronto com um clique só. Vem com atalhos padrão (Spotify, Chrome, Pesquisar, Play/Pause, Próxima) e dá pra criar/remover os seus próprios.
+- 💬 **Autocompletar**: sugestões enquanto você digita, baseadas no histórico de comandos, nas palavras-chave conhecidas e nos apps já instalados no PC.
+- 🔧 **Autocorreção**: erros de digitação no comando (ex: "abrri" em vez de "abrir") são detectados e corrigidos automaticamente.
+- 🎵 **Controle de música**: toca qualquer música pesquisando direto no Spotify, com play/pause, próxima/anterior faixa pelas teclas de mídia do sistema.
+- 🚀 **Abertura de qualquer app instalado**: indexa automaticamente os atalhos do Menu Iniciar e o registro do Windows (`App Paths`), então "abrir X" funciona pra praticamente qualquer programa instalado.
+- 🎮 **Jogos via protocolo** (Steam, e extensível pra outros launchers): abre direto pelo `steam://`, sem precisar navegar pela lib.
+- 🌐 **Pesquisa no navegador**: abre o navegador já pesquisando o termo, com suporte a escolher o motor de busca no próprio comando (`pesquisar no youtube ...`).
+- 💻 **Painel de Sistema**: mostra processador, RAM, placa de vídeo e armazenamento do PC.
+- 🎨 **Tema personalizável**: roda de cores (estilo HSV) gera um esquema monocromático completo pro app, salvo entre sessões.
+- 🔊 **Fala (text-to-speech)**: o assistente responde em voz alta usando gTTS.
+- ▶ **Inicialização automática com o Windows** (opcional, configurável na interface).
 
 ## Instalação
 
-1. Copie a pasta `projeto` inteira para o computador (não deixe uma pasta
-   `projeto` dentro de outra `projeto` — o `interface.py` deve ficar direto
-   dentro da pasta, ex: `C:\Users\SEUNOME\projeto\interface.py`).
+### Pré-requisitos
 
-2. Abra o terminal dentro dessa pasta e instale todas as dependências de
-   uma vez com:
+- Windows 10/11
+- [Python 3.10+](https://python.org) (marcar "Add to PATH" no instalador)
 
-   ```
-   py -m pip install -r requirements.txt
-   ```
+### Rodando a partir do código
 
-   Isso instala tudo que o app precisa: `PySide6` (interface gráfica),
-   `psutil` e `pywin32` (informações de sistema), `pyautogui` e `gtts`
-   (comandos e voz), `playsound` (tocar áudio) e `wheel` (ferramenta de
-   instalação usada por algumas dessas libs).
+```powershell
+git clone https://github.com/sankaito/Assistente-Ikuromimy.git
+cd Assistente-Ikuromimy
 
-## Como executar
+python -m venv venv
+venv\Scripts\activate
 
-Dentro da pasta `projeto`, rode:
+pip install -r requirements.txt
 
-```
-py interface.py
+python interface.py
 ```
 
-### Atalho com duplo clique
+### Gerando o executável (.exe)
 
-Também é possível usar o arquivo `iniciar.bat` (se ele estiver na pasta):
-basta dar duplo clique nele. Esse `.bat` entra automaticamente na pasta
-onde está e roda o `interface.py`, então funciona não importa em qual
-computador ou caminho o projeto esteja.
+Com o ambiente já configurado (passos acima), basta rodar:
 
-## Estrutura da pasta
+```powershell
+build.bat
+```
+
+Isso gera `dist\Assistente Virtual Ikuromimy.exe` — um executável
+standalone, que não depende mais de Python instalado pra rodar.
+
+Pra criar um atalho na Área de Trabalho apontando pra esse `.exe`:
+
+```powershell
+python criar_atalho.py
+```
+
+## Como usar
+
+Digite comandos no campo de texto, ou clique num dos atalhos
+pré-definidos. Alguns exemplos de comando:
+
+| Comando                          | O que faz                                  |
+|-----------------------------------|---------------------------------------------|
+| `abrir spotify`                   | Abre o Spotify (ou qualquer outro app)      |
+| `tocar bohemian rhapsody`         | Pesquisa e toca a música no Spotify         |
+| `fechar chrome`                   | Fecha o processo do Chrome                  |
+| `pesquisar receita de bolo`       | Abre o navegador já pesquisando             |
+| `pesquisar no youtube lofi`       | Pesquisa direto no YouTube                  |
+| `play` / `pause`                  | Play/pause da faixa atual                   |
+| `próxima` / `anterior`            | Pula/volta faixa                            |
+| `aumentar volume` / `diminuir volume` | Ajusta o volume do sistema              |
+| `atualizar apps`                  | Reindexação dos apps instalados             |
+| `sair`                            | Encerra o assistente                        |
+
+## Estrutura do projeto
 
 ```
 projeto/
-├── interface.py
-├── escravo.py
-├── requirements.txt
-├── iniciar.bat
+├── interface.py         # ponto de entrada da interface gráfica
+├── escravo.py             # lógica de processamento de comandos
+├── requirements.txt        # dependências Python
+├── ikuro.spec               # receita de empacotamento (PyInstaller)
+├── build.bat                  # gera o .exe
+├── criar_atalho.py             # cria atalho na Área de Trabalho
+│
 └── ui/
-    ├── __init__.py
-    ├── console.py
-    ├── widgets.py          (ColorWheel, usado na aba Configurações)
-    ├── sidebar.py           (menu lateral)
-    ├── main_window.py       (janela principal, troca as páginas)
-    ├── theme_manager.py     (salva/aplica o tema de cor escolhido)
-    ├── system_info.py       (coleta dados de hardware do PC)
+    ├── main_window.py             # janela principal
+    ├── sidebar.py                  # menu lateral
+    ├── theme_manager.py             # geração/persistência de tema
+    ├── shortcuts_manager.py          # atalhos pré-definidos
+    ├── command_history.py             # histórico p/ autocompletar
+    ├── system_info.py                   # coleta info de hardware
+    │
     └── pages/
-        ├── __init__.py
-        ├── home_page.py      (comando livre + log)
-        ├── music_page.py
-        ├── settings_page.py  (escolha de tema/cor)
-        └── system_page.py    (mostra processador, RAM, placa de vídeo, disco)
+        ├── home_page.py                  # comando livre + atalhos
+        ├── music_page.py                  # controle de mídia
+        ├── settings_page.py                # tema + inicialização
+        └── system_page.py                   # painel de hardware
 ```
 
-## Solução de problemas
+## Versionamento
 
-**`pip`/`python`/`py` não reconhecido no terminal**
-O Python não está instalado ou não foi adicionado ao PATH. Reinstale
-marcando "Add python.exe to PATH", feche e abra o terminal de novo.
+O projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+Veja o histórico completo de mudanças no [CHANGELOG.md](CHANGELOG.md).
 
-**`No module named 'X'`**
-Alguma dependência não foi instalada. Rode
-`py -m pip install -r requirements.txt` novamente, ou instale a lib que
-faltou diretamente com `py -m pip install X`.
+Versão atual: **1.10.0**
 
-**`No such file or directory` ao rodar `interface.py`**
-Você está numa pasta diferente da que tem o arquivo. Confirme o caminho
-com `dir` e entre na pasta certa com `cd CAMINHO\DA\PASTA` antes de
-rodar o `py interface.py`.
+## Aviso
 
-**Erro ao instalar `playsound`**
-Instale a versão fixa `1.2.2`, que não depende de compilação:
-`py -m pip install playsound==1.2.2`
+Esse assistente automatiza o teclado/mouse do sistema (via
+`pyautogui`) pra algumas funções, como buscar músicas no app do
+Spotify. Use por sua conta e risco, e evite mexer no PC enquanto um
+comando estiver em execução.
