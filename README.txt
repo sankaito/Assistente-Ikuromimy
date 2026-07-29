@@ -11,6 +11,7 @@ volume, entre outros.
 - 🔘 **Atalhos pré-definidos**: botões na tela que executam um comando pronto com um clique só. Vem com atalhos padrão (Spotify, Chrome, Pesquisar, Play/Pause, Próxima) e dá pra criar/remover os seus próprios.
 - 💬 **Autocompletar**: sugestões enquanto você digita, baseadas no histórico de comandos, nas palavras-chave conhecidas e nos apps já instalados no PC.
 - 🔧 **Autocorreção**: erros de digitação no comando (ex: "abrri" em vez de "abrir") são detectados e corrigidos automaticamente.
+- 🧩 **Modos**: grupos de até 5 comandos que executam em sequência com um clique só (ex: "Modo Programador" abre VSCode + Spotify + Claude de uma vez). Crie e remova os seus próprios modos direto pela interface.
 - 🎵 **Controle de música**: toca qualquer música pesquisando direto no Spotify, com play/pause, próxima/anterior faixa pelas teclas de mídia do sistema.
 - 🚀 **Abertura de qualquer app instalado**: indexa automaticamente os atalhos do Menu Iniciar e o registro do Windows (`App Paths`), então "abrir X" funciona pra praticamente qualquer programa instalado.
 - 🎮 **Jogos via protocolo** (Steam, e extensível pra outros launchers): abre direto pelo `steam://`, sem precisar navegar pela lib.
@@ -93,13 +94,17 @@ projeto/
     ├── theme_manager.py             # geração/persistência de tema
     ├── shortcuts_manager.py          # atalhos pré-definidos
     ├── command_history.py             # histórico p/ autocompletar
-    ├── system_info.py                   # coleta info de hardware
+    ├── modes_manager.py                 # modos (grupos de comandos)
+    ├── modes_dialog.py                   # caixa de criação de modos
+    ├── modes_executor.py                  # roda os comandos de um modo
+    ├── system_info.py                       # coleta info de hardware
     │
     └── pages/
         ├── home_page.py                  # comando livre + atalhos
         ├── music_page.py                  # controle de mídia
         ├── settings_page.py                # tema + inicialização
-        └── system_page.py                   # painel de hardware
+        ├── system_page.py                   # painel de hardware
+        └── modes_page.py                     # aba de Modos
 ```
 
 ## Versionamento
@@ -107,7 +112,7 @@ projeto/
 O projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 Veja o histórico completo de mudanças no [CHANGELOG.md](CHANGELOG.md).
 
-Versão atual: **1.10.0**
+Versão atual: **1.11.0**
 
 ## Aviso
 
