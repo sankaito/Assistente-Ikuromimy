@@ -10,6 +10,24 @@ Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 ---
 
+## [1.13.0] — Janela customizada
+
+### Adicionado
+- **Barra de título customizada** (`ui/title_bar.py`), substituindo a
+  barra padrão do Windows — combina com o tema escolhido, com botões
+  de minimizar/maximizar/fechar estilizados. Arrastar/encaixar a
+  janela usa a API nativa do Qt6 (`startSystemMove`).
+- **Ícone do app** aplicado corretamente na barra de tarefas e no
+  canto da barra de título (antes só estava no `.exe`/atalho, não
+  aparecia enquanto o app estava aberto).
+- "Puxador" no canto inferior direito pra redimensionar a janela
+  (necessário porque janela sem moldura não vem com isso de graça).
+
+### Trade-offs conhecidos
+- Perde a sombra nativa do Windows 11 e o menu de "snap" ao pairar
+  sobre o botão de maximizar — limitações inerentes de janelas sem
+  moldura no Qt/Windows.
+
 ## [1.12.0] — Atualizador embutido
 
 ### Adicionado

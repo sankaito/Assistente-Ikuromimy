@@ -1,8 +1,16 @@
+import os
+import sys
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QMainWindow,
-    QWidget,
+    QApplication,
     QHBoxLayout,
+    QMainWindow,
+    QSizeGrip,
     QStackedWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
 from ui.sidebar import Sidebar
@@ -12,7 +20,16 @@ from ui.pages.settings_page import SettingsPage
 from ui.pages.system_page import SystemPage
 from ui.pages.remote_page import RemotePage
 from ui.pages.modes_page import ModesPage
+from ui.title_bar import TitleBar
 from ui import theme_manager
+
+
+def _caminho_icone() -> str | None:
+    """Acha o icon.ico tanto rodando via 'python interface.py' quanto
+    dentro do .exe empacotado (sys._MEIPASS)."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    caminho = os.path.join(base, "icon.ico")
+    return caminho if os.path.exists(caminho) else None
 
 
 class MainWindow(QMainWindow):
@@ -20,28 +37,48 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Assistente Virtual Ikuromimy")
+        # janela "sem moldura" — a barra de título é toda nossa, feita
+        # em ui/title_bar.py, pra combinar com o tema do app
+        self.setWindowFlag(Qt.FramelessWindowHint)
         self.resize(1100, 700)
+
+        caminho_icone = _caminho_icone()
+        if caminho_icone:
+            icone = QIcon(caminho_icone)
+            self.setWindowIcon(icone)
+            app = QApplication.instance()
+            if app is not None:
+                app.setWindowIcon(icone)  # ícone na barra de tarefas
 
         # reaplica o tema escolhido numa sessão anterior (ou o padrão,
         # se o usuário nunca personalizou nada ainda)
         theme_manager.aplicar_tema(theme_manager.carregar_cor())
 
-        self.criar_interface()
+        self.criar_interface(caminho_icone)
 
-    def criar_interface(self):
+    def criar_interface(self, caminho_icone: str | None):
 
         principal = QWidget()
         self.setCentralWidget(principal)
 
-        layout = QHBoxLayout(principal)
+        layout_geral = QVBoxLayout(principal)
+        layout_geral.setContentsMargins(0, 0, 0, 0)
+        layout_geral.setSpacing(0)
 
-        # MENU LATERAL
+        # BARRA DE TÍTULO CUSTOMIZADA
+        self.barra_titulo = TitleBar("Assistente Virtual Ikuromimy", caminho_icone, self)
+        layout_geral.addWidget(self.barra_titulo)
+
+        # CORPO (sidebar + páginas)
+        corpo = QWidget()
+        layout_corpo = QHBoxLayout(corpo)
+        layout_corpo.setContentsMargins(0, 0, 0, 0)
+        layout_corpo.setSpacing(0)
+
         self.sidebar = Sidebar()
         self.sidebar.pagina_selecionada.connect(self.trocar_pagina)
-        layout.addWidget(self.sidebar)
+        layout_corpo.addWidget(self.sidebar)
 
-        # PÁGINAS (troca só a parte da direita, sidebar fica fixa)
         self.paginas = QStackedWidget()
 
         self.pagina_inicio = HomePage()
@@ -68,7 +105,16 @@ class MainWindow(QMainWindow):
             "modos": self.pagina_modos,
         }
 
-        layout.addWidget(self.paginas)
+        layout_corpo.addWidget(self.paginas)
+        layout_geral.addWidget(corpo, stretch=1)
+
+        # "puxador" de redimensionar no canto inferior direito (janela
+        # sem moldura não vem com isso de graça)
+        rodape = QHBoxLayout()
+        rodape.setContentsMargins(0, 0, 0, 0)
+        rodape.addStretch()
+        rodape.addWidget(QSizeGrip(self))
+        layout_geral.addLayout(rodape)
 
     def trocar_pagina(self, chave: str) -> None:
         pagina = self._mapa_paginas.get(chave, self.pagina_inicio)

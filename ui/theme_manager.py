@@ -129,6 +129,39 @@ QScrollBar::handle:vertical {{
     background: {c['borda']};
     border-radius: 4px;
 }}
+
+QWidget#barra_titulo {{
+    background-color: {c['card']};
+    border-bottom: 1px solid {c['borda']};
+}}
+QLabel#titulo_barra {{
+    font-size: 13px;
+    font-weight: 600;
+    color: {c['texto']};
+}}
+QPushButton#botao_titulo {{
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+    font-size: 13px;
+}}
+QPushButton#botao_titulo:hover {{
+    background-color: {c['card_hover']};
+    border: none;
+}}
+QPushButton#botao_fechar {{
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+    font-size: 13px;
+}}
+QPushButton#botao_fechar:hover {{
+    background-color: #e81123;
+    color: #ffffff;
+    border: none;
+}}
 """
 
 

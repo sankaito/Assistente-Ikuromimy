@@ -19,6 +19,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ("styles/dark.qss", "styles"),
+        *([(caminho_icone, ".")] if caminho_icone else []),
     ],
     hiddenimports=[
         "win32timezone",   # dependência "escondida" comum do pywin32
