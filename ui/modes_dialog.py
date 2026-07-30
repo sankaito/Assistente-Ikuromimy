@@ -11,18 +11,20 @@ from ui.modes_manager import LIMITE_COMANDOS_POR_MODO
 
 
 class CriarModoDialog(QDialog):
-    """Caixa de criação: nome do modo + campos de comando, com um
-    botão '+' pra adicionar mais (até o limite de 5)."""
+    """Caixa de criação/edição de modo: nome + campos de comando, com
+    um botão '+' pra adicionar mais (até o limite de 5). Passando
+    'nome_inicial' e 'comandos_iniciais', a caixa abre já preenchida
+    (usado tanto pra criar um modo novo quanto editar um existente)."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, nome_inicial: str = "", comandos_iniciais: list[str] | None = None):
         super().__init__(parent)
-        self.setWindowTitle("Criar modo")
+        self.setWindowTitle("Editar modo" if comandos_iniciais else "Criar modo")
         self.setMinimumWidth(360)
 
         layout = QVBoxLayout(self)
 
         layout.addWidget(QLabel("Nome do modo (ex: 🧑‍💻 Modo Programador):"))
-        self.campo_nome = QLineEdit()
+        self.campo_nome = QLineEdit(nome_inicial)
         layout.addWidget(self.campo_nome)
 
         layout.addWidget(QLabel("Comandos (executam em sequência, um por vez):"))
@@ -31,10 +33,11 @@ class CriarModoDialog(QDialog):
         layout.addLayout(self._layout_comandos)
 
         self.campos_comando: list[QLineEdit] = []
-        self._adicionar_campo_comando()
+        for texto in (comandos_iniciais or [""]):
+            self._adicionar_campo_comando(texto)
 
         self.btn_adicionar = QPushButton("+ Adicionar comando")
-        self.btn_adicionar.clicked.connect(self._adicionar_campo_comando)
+        self.btn_adicionar.clicked.connect(lambda: self._adicionar_campo_comando())
         layout.addWidget(self.btn_adicionar)
 
         botoes = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
@@ -42,11 +45,11 @@ class CriarModoDialog(QDialog):
         botoes.rejected.connect(self.reject)
         layout.addWidget(botoes)
 
-    def _adicionar_campo_comando(self) -> None:
+    def _adicionar_campo_comando(self, texto_inicial: str = "") -> None:
         if len(self.campos_comando) >= LIMITE_COMANDOS_POR_MODO:
             return
 
-        campo = QLineEdit()
+        campo = QLineEdit(texto_inicial)
         campo.setPlaceholderText(f"Comando {len(self.campos_comando) + 1} (ex: abrir spotify)")
         self._layout_comandos.addWidget(campo)
         self.campos_comando.append(campo)

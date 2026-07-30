@@ -29,7 +29,7 @@ class HomePage(QWidget):
         titulo = QLabel("🤖 Assistente Virtual Ikuromimy")
         titulo.setObjectName("titulo")
 
-        subtitulo = QLabel("Digite um comando ou clique em um atalho")
+        subtitulo = QLabel("Digite um comando, clique em um atalho, ou clique direito pra editar/remover")
 
         # -- atalhos pré-definidos ------------------------------------------
         area.addWidget(titulo)
@@ -72,8 +72,7 @@ class HomePage(QWidget):
             if widget:
                 widget.deleteLater()
 
-        atalhos = shortcuts_manager.listar_todos_os_atalhos()
-        personalizados = {a["label"] for a in shortcuts_manager.listar_atalhos_personalizados()}
+        atalhos = shortcuts_manager.listar_atalhos()
 
         for i, atalho in enumerate(atalhos):
             botao = QPushButton(atalho["label"])
@@ -81,11 +80,10 @@ class HomePage(QWidget):
                 lambda checked=False, c=atalho["comando"]: self._executar_texto(c)
             )
 
-            if atalho["label"] in personalizados:
-                botao.setContextMenuPolicy(Qt.CustomContextMenu)
-                botao.customContextMenuRequested.connect(
-                    lambda pos, l=atalho["label"], b=botao: self._menu_remover_atalho(l, b, pos)
-                )
+            botao.setContextMenuPolicy(Qt.CustomContextMenu)
+            botao.customContextMenuRequested.connect(
+                lambda pos, a=atalho, b=botao: self._menu_contexto_atalho(a, b, pos)
+            )
 
             linha, coluna = divmod(i, COLUNAS_ATALHOS)
             self.grid_atalhos.addWidget(botao, linha, coluna)
@@ -97,12 +95,16 @@ class HomePage(QWidget):
         botao_add.clicked.connect(self._adicionar_atalho)
         self.grid_atalhos.addWidget(botao_add, linha, coluna)
 
-    def _menu_remover_atalho(self, label: str, botao: QPushButton, pos) -> None:
+    def _menu_contexto_atalho(self, atalho: dict, botao: QPushButton, pos) -> None:
         menu = QMenu(self)
-        acao_remover = menu.addAction("Remover atalho")
+        acao_editar = menu.addAction("Editar")
+        acao_remover = menu.addAction("Remover")
         escolhida = menu.exec(botao.mapToGlobal(pos))
-        if escolhida == acao_remover:
-            shortcuts_manager.remover_atalho(label)
+
+        if escolhida == acao_editar:
+            self._editar_atalho(atalho)
+        elif escolhida == acao_remover:
+            shortcuts_manager.remover_atalho(atalho["id"])
             self._montar_atalhos()
 
     def _adicionar_atalho(self) -> None:
@@ -115,6 +117,22 @@ class HomePage(QWidget):
             return
 
         shortcuts_manager.adicionar_atalho(label.strip(), comando.strip())
+        self._montar_atalhos()
+
+    def _editar_atalho(self, atalho: dict) -> None:
+        novo_label, ok = QInputDialog.getText(
+            self, "Editar atalho", "Nome do botão:", text=atalho["label"]
+        )
+        if not ok or not novo_label.strip():
+            return
+
+        novo_comando, ok = QInputDialog.getText(
+            self, "Editar atalho", "Comando a executar:", text=atalho["comando"]
+        )
+        if not ok or not novo_comando.strip():
+            return
+
+        shortcuts_manager.editar_atalho(atalho["id"], novo_label.strip(), novo_comando.strip())
         self._montar_atalhos()
 
     # ----------------------------------------------------------------

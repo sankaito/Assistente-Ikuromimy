@@ -1,12 +1,13 @@
 """
 Modos: grupos de até 5 comandos que executam em sequência com um
-clique só (ex: "🧑‍💻 Modo Programador" abre VSCode + Spotify + Claude
-de uma vez). Persistidos via QSettings, mesmo mecanismo dos atalhos.
+clique só. Cada modo tem um 'id' interno estável, pra dar pra editar
+o nome/comandos sem perder a referência de qual modo é qual.
 """
 
 from __future__ import annotations
 
 import json
+import uuid
 
 from PySide6.QtCore import QSettings
 
@@ -17,15 +18,24 @@ _CHAVE_MODOS = "modos/personalizados"
 LIMITE_COMANDOS_POR_MODO = 5
 
 
+def _com_id(modo: dict) -> dict:
+    if "id" not in modo:
+        modo = {**modo, "id": uuid.uuid4().hex}
+    return modo
+
+
 def listar_modos() -> list[dict]:
     settings = QSettings(_ORG, _APP)
     bruto = settings.value(_CHAVE_MODOS, "")
     if not bruto:
         return []
     try:
-        return json.loads(bruto)
+        modos = json.loads(bruto)
     except (json.JSONDecodeError, TypeError):
         return []
+
+    # compatibilidade com registros salvos antes de existir o 'id'
+    return [_com_id(m) for m in modos]
 
 
 def _salvar_modos(modos: list[dict]) -> None:
@@ -39,11 +49,25 @@ def adicionar_modo(nome: str, comandos: list[str]) -> None:
         return
 
     modos = listar_modos()
-    modos.append({"nome": nome.strip(), "comandos": comandos})
+    modos.append({"id": uuid.uuid4().hex, "nome": nome.strip(), "comandos": comandos})
     _salvar_modos(modos)
 
 
-def remover_modo(nome: str) -> None:
+def editar_modo(id_modo: str, novo_nome: str, novos_comandos: list[str]) -> None:
+    novos_comandos = [c.strip() for c in novos_comandos if c.strip()][:LIMITE_COMANDOS_POR_MODO]
+    if not novo_nome.strip() or not novos_comandos:
+        return
+
     modos = listar_modos()
-    modos = [m for m in modos if m["nome"] != nome]
+    for modo in modos:
+        if modo["id"] == id_modo:
+            modo["nome"] = novo_nome.strip()
+            modo["comandos"] = novos_comandos
+            break
+    _salvar_modos(modos)
+
+
+def remover_modo(id_modo: str) -> None:
+    modos = listar_modos()
+    modos = [m for m in modos if m["id"] != id_modo]
     _salvar_modos(modos)

@@ -23,10 +23,16 @@ Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 - Aba Música: botões de **volume em ±10% exatos** (`ui/audio_control.py`,
   via pycaw/Core Audio do Windows — mais preciso que as teclas de
   mídia, que sobem/descem um valor fixo do driver).
-- Aba Música: mostra **título e artista da música tocando no momento**
-  no Spotify (`ui/media_info.py`, lê o título da janela — sem precisar
-  de API key nem bibliotecas extras), atualizado a cada poucos
+- Aba Música: mostra **título, artista e capa do álbum** da música
+  tocando no momento no Spotify (`ui/media_info.py`) — o título/artista
+  vêm do título da janela, e a capa vem da API pública gratuita do
+  iTunes (sem chave de API, sem cadastro, funciona pra qualquer pessoa
+  que baixar o app, sem setup nenhum). Atualizado a cada poucos
   segundos em segundo plano (`ui/media_info_worker.py`).
+- **Editar atalhos e modos**: clique direito em qualquer atalho ou
+  modo — inclusive os que já vêm prontos por padrão — pra editar ou
+  remover. Antes só dava pra remover os criados manualmente; agora
+  tudo é um registro igual, com ID interno estável.
 
 ## [1.11.0] — Modos
 
