@@ -12,5 +12,8 @@ pywin32>=306
 # Controle remoto (servidor local)
 flask>=3.0
 
+# Volume preciso e info da música tocando
+comtypes>=1.2
+
 # Empacotamento
 pyinstaller>=6.10

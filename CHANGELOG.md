@@ -10,6 +10,24 @@ Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 ---
 
+## [1.12.0] — Atualizador embutido
+
+### Adicionado
+- Botão **"🔄 Atualizar Assistente"** na aba Sistema: verifica a versão
+  mais recente nos Releases do GitHub (`ui/updater.py`), e se tiver
+  uma nova, pergunta e baixa o `.exe` sozinho, substituindo o atual e
+  reabrindo o app automaticamente — sem precisar procurar manualmente.
+- Download e verificação rodam numa thread separada
+  (`ui/updater_worker.py`), com barra de progresso, sem travar a
+  interface.
+- Aba Música: botões de **volume em ±10% exatos** (`ui/audio_control.py`,
+  via pycaw/Core Audio do Windows — mais preciso que as teclas de
+  mídia, que sobem/descem um valor fixo do driver).
+- Aba Música: mostra **título e artista da música tocando no momento**
+  no Spotify (`ui/media_info.py`, lê o título da janela — sem precisar
+  de API key nem bibliotecas extras), atualizado a cada poucos
+  segundos em segundo plano (`ui/media_info_worker.py`).
+
 ## [1.11.0] — Modos
 
 ### Adicionado

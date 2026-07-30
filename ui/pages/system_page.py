@@ -3,12 +3,16 @@ from PySide6.QtWidgets import (
     QFrame,
     QGridLayout,
     QLabel,
+    QMessageBox,
+    QProgressBar,
     QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
 from ui import system_info
+from ui.updater_worker import UpdaterWorker
+from ui.version import VERSAO
 
 
 class SystemPage(QWidget):
@@ -38,6 +42,27 @@ class SystemPage(QWidget):
         self._grid.setHorizontalSpacing(16)
         self._grid.setVerticalSpacing(16)
         area.addLayout(self._grid)
+
+        # -- atualização do assistente --------------------------------------
+        self._worker: UpdaterWorker | None = None
+        self._info_atualizacao: dict | None = None
+
+        rotulo_versao = QLabel(f"Versão instalada: {VERSAO}")
+        rotulo_versao.setStyleSheet("color: #9a9aa2; margin-top: 16px;")
+
+        self.btn_verificar_update = QPushButton("🔄 Atualizar Assistente")
+        self.btn_verificar_update.clicked.connect(self._verificar_atualizacao)
+
+        self.barra_progresso = QProgressBar()
+        self.barra_progresso.setVisible(False)
+
+        self.status_update = QLabel("")
+        self.status_update.setWordWrap(True)
+
+        area.addWidget(rotulo_versao)
+        area.addWidget(self.btn_verificar_update, alignment=Qt.AlignLeft)
+        area.addWidget(self.barra_progresso)
+        area.addWidget(self.status_update)
 
         area.addStretch()
 
@@ -103,3 +128,65 @@ class SystemPage(QWidget):
         self._grid.addWidget(card_ram, 0, 1)
         self._grid.addWidget(card_gpu, 1, 0)
         self._grid.addWidget(card_disco, 1, 1)
+
+    # ------------------------------------------------------------------
+    # atualização do assistente
+    # ------------------------------------------------------------------
+
+    def _verificar_atualizacao(self) -> None:
+        self.btn_verificar_update.setEnabled(False)
+        self.status_update.setText("Procurando atualizações...")
+
+        self._worker = UpdaterWorker(modo="verificar")
+        self._worker.verificado.connect(self._ao_verificar)
+        self._worker.start()
+
+    def _ao_verificar(self, resultado: dict | None) -> None:
+        self.btn_verificar_update.setEnabled(True)
+
+        if not resultado:
+            self.status_update.setText("✓ Você já está na versão mais recente.")
+            return
+
+        self._info_atualizacao = resultado
+
+        caixa = QMessageBox(self)
+        caixa.setWindowTitle("Atualização disponível")
+        caixa.setText(
+            f"Tem uma versão nova: {resultado['tag']}\n\n"
+            f"{resultado['notas'] or 'Sem notas de versão.'}\n\n"
+            "Baixar e instalar agora? O app vai fechar e abrir de novo "
+            "automaticamente."
+        )
+        caixa.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        if caixa.exec() == QMessageBox.Yes:
+            self._baixar_atualizacao()
+
+    def _baixar_atualizacao(self) -> None:
+        if not self._info_atualizacao:
+            return
+
+        self.btn_verificar_update.setEnabled(False)
+        self.barra_progresso.setVisible(True)
+        self.barra_progresso.setValue(0)
+        self.status_update.setText("Baixando atualização...")
+
+        self._worker = UpdaterWorker(
+            modo="baixar", url_download=self._info_atualizacao["url_download"]
+        )
+        self._worker.progresso.connect(self._ao_progredir)
+        self._worker.concluido.connect(self._ao_concluir)
+        self._worker.start()
+
+    def _ao_progredir(self, baixado: int, total: int) -> None:
+        if total > 0:
+            self.barra_progresso.setValue(int(baixado / total * 100))
+
+    def _ao_concluir(self, sucesso: bool, mensagem: str) -> None:
+        self.status_update.setText(mensagem)
+        self.barra_progresso.setVisible(False)
+        self.btn_verificar_update.setEnabled(True)
+
+        if sucesso:
+            from PySide6.QtWidgets import QApplication
+            QApplication.instance().quit()
