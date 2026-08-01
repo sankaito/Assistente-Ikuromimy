@@ -13,7 +13,7 @@ from ui import updater
 class UpdaterWorker(QThread):
 
     progresso = Signal(int, int)     # bytes baixados, total
-    verificado = Signal(object)       # dict com a atualização, ou None
+    verificado = Signal(object)        # dict {ok, atualizacao, erro} — ver updater.py
     concluido = Signal(bool, str)      # sucesso, mensagem
 
     def __init__(self, modo: str, url_download: str = "", parent=None):

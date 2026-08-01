@@ -41,6 +41,33 @@ def obter_ip_local() -> str:
         s.close()
 
 
+def obter_mac_local() -> str | None:
+    """Descobre o endereço MAC da mesma placa de rede usada pelo
+    obter_ip_local() — é esse endereço que o app Android precisa pra
+    montar o 'pacote mágico' do Wake-on-LAN. Devolve None se não
+    conseguir identificar (ex: alguma configuração de rede incomum)."""
+    import psutil
+
+    ip_local = obter_ip_local()
+
+    for enderecos in psutil.net_if_addrs().values():
+        tem_o_ip = any(
+            e.family == socket.AF_INET and e.address == ip_local
+            for e in enderecos
+        )
+        if not tem_o_ip:
+            continue
+
+        for e in enderecos:
+            # AF_LINK/AF_PACKET é a "família" do endereço MAC — o
+            # valor exato do enum varia por sistema, checar pelo nome
+            # evita depender do número específico.
+            if e.family.name in ("AF_LINK", "AF_PACKET"):
+                return e.address.upper().replace("-", ":")
+
+    return None
+
+
 def gerar_token() -> str:
     return secrets.token_hex(4)  # 8 caracteres, fácil de digitar no celular
 

@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui import startup_manager, theme_manager
+from ui import startup_manager, theme_manager, version
 from ui.widgets import ColorWheel
 
 
@@ -100,6 +100,10 @@ class SettingsPage(QWidget):
             )
 
         area.addStretch()
+
+        rotulo_versao = QLabel(f"Versão {version.VERSAO}")
+        rotulo_versao.setStyleSheet("color: #666666; font-size: 12px;")
+        area.addWidget(rotulo_versao, alignment=Qt.AlignRight)
 
         self._atualizar_previa(cor_salva)
 

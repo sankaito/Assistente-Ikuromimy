@@ -10,6 +10,47 @@ Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 ---
 
+## [1.13.4] — Bugfix
+
+### Corrigido
+- O atualizador aplicava um `.exe` baixado incompleto/corrompido sem
+  perceber, resultando em "Failed to load Python DLL" ao reabrir.
+  Agora `baixar_atualizacao()` confere o tamanho do arquivo baixado
+  contra o esperado, e tenta baixar de novo automaticamente (até 3x)
+  se vier corrompido, antes de desistir e avisar que falhou — em vez
+  de aplicar um arquivo quebrado silenciosamente.
+
+## [1.13.3] — Bugfix
+
+### Corrigido
+- O `.bat` de atualização abria uma janela de console travada (presa
+  no comando `find`) em vez de rodar escondido — causado pela flag
+  `DETACHED_PROCESS`, que quebra o pipe entre `tasklist` e `find` e faz
+  o Windows abrir um console visível do nada. Removida a checagem via
+  `tasklist`/`find` (não é mais necessária, já que a cópia já tenta de
+  novo sozinha) e trocada a flag pra `CREATE_NO_WINDOW`, que esconde a
+  janela sem quebrar os comandos internos do script.
+
+## [1.13.2] — Bugfix
+
+### Corrigido
+- O atualizador baixava, fechava o app, mas não reabria: a cópia do
+  `.exe` novo por cima do antigo podia falhar silenciosamente numa
+  corrida com o Windows/antivírus ainda segurando o arquivo travado
+  logo após o processo antigo encerrar. Agora o script de atualização
+  tenta de novo automaticamente (até 10 vezes) e grava um log em
+  `%TEMP%\atualizar_ikuromimy.log` pra diagnóstico, caso volte a falhar.
+
+## [1.13.1] — Bugfix
+
+### Corrigido
+- O atualizador embutido dizia "já está atualizado" mesmo quando a
+  verificação tinha **falhado de verdade** (sem internet, erro na API
+  do GitHub, Release sem `.exe` anexado) — as duas situações caíam na
+  mesma mensagem, escondendo o problema. Agora `verificar_atualizacao()`
+  distingue erro de "realmente atualizado", mostrando o motivo exato
+  quando algo dá errado.
+
 ## [1.13.0] — Janela customizada
 
 ### Adicionado

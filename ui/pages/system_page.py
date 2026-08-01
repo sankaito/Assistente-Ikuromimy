@@ -141,20 +141,25 @@ class SystemPage(QWidget):
         self._worker.verificado.connect(self._ao_verificar)
         self._worker.start()
 
-    def _ao_verificar(self, resultado: dict | None) -> None:
+    def _ao_verificar(self, resultado: dict) -> None:
         self.btn_verificar_update.setEnabled(True)
 
-        if not resultado:
+        if not resultado.get("ok"):
+            self.status_update.setText(f"❌ {resultado.get('erro', 'Falha ao verificar atualização.')}")
+            return
+
+        atualizacao = resultado.get("atualizacao")
+        if not atualizacao:
             self.status_update.setText("✓ Você já está na versão mais recente.")
             return
 
-        self._info_atualizacao = resultado
+        self._info_atualizacao = atualizacao
 
         caixa = QMessageBox(self)
         caixa.setWindowTitle("Atualização disponível")
         caixa.setText(
-            f"Tem uma versão nova: {resultado['tag']}\n\n"
-            f"{resultado['notas'] or 'Sem notas de versão.'}\n\n"
+            f"Tem uma versão nova: {atualizacao['tag']}\n\n"
+            f"{atualizacao['notas'] or 'Sem notas de versão.'}\n\n"
             "Baixar e instalar agora? O app vai fechar e abrir de novo "
             "automaticamente."
         )

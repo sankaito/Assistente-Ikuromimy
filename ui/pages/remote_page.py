@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
 from ui import remote_config
-from ui.remote_server import PORTA_PADRAO, ServidorRemoto, gerar_token, obter_ip_local
+from ui.remote_server import PORTA_PADRAO, ServidorRemoto, gerar_token, obter_ip_local, obter_mac_local
 
 
 class RemotePage(QWidget):
@@ -30,6 +30,12 @@ class RemotePage(QWidget):
         self.label_token = QLabel(f"Chave de acesso:  {self._token}")
         self.label_token.setStyleSheet("font-size: 18px; font-weight: 600;")
 
+        mac = obter_mac_local()
+        texto_mac = mac if mac else "não foi possível detectar"
+        self.label_mac = QLabel(f"Endereço MAC (pra ligar o PC pelo celular):  {texto_mac}")
+        self.label_mac.setStyleSheet("font-size: 14px; color: #9a9aa2;")
+        self.label_mac.setWordWrap(True)
+
         self.btn_novo_token = QPushButton("Gerar nova chave")
         self.btn_novo_token.clicked.connect(self._gerar_novo_token)
 
@@ -40,7 +46,10 @@ class RemotePage(QWidget):
 
         aviso = QLabel(
             "⚠️ Só funciona com o celular na MESMA rede Wi-Fi do PC. "
-            "Não expõe nada pra internet."
+            "Não expõe nada pra internet.\n"
+            "⚠️ Pra 'Ligar PC' funcionar pelo celular (Wake-on-LAN), "
+            "o PC precisa estar em Suspensão (não desligado de vez), "
+            "e essa opção precisa estar habilitada no Windows/BIOS."
         )
         aviso.setWordWrap(True)
         aviso.setStyleSheet("color: #9a9aa2;")
@@ -49,6 +58,7 @@ class RemotePage(QWidget):
         area.addWidget(subtitulo)
         area.addWidget(self.label_ip)
         area.addWidget(self.label_token)
+        area.addWidget(self.label_mac)
         area.addWidget(self.btn_novo_token, alignment=Qt.AlignLeft)
         area.addWidget(self.btn_ligar)
         area.addWidget(self.status)
